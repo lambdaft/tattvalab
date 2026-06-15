@@ -151,8 +151,8 @@ def render_diamond_grid(side, clock_config, container):
 
 # ====================== TAB DEFINITIONS ======================
 tab1, tab2 = st.tabs([
-    "🚀 Spatial Logger",
-    "⚙️ Settings"
+    "Logger",
+    "Settings"
 ])
 
 # ==========================================
@@ -160,7 +160,7 @@ tab1, tab2 = st.tabs([
 # ==========================================
 with tab1:
     with st.sidebar:
-        st.header("🎮 Live Controls")
+        st.header("Controls")
         st.session_state['active_preset'] = st.radio("Active Logic Mapping", ["Preset A", "Preset B"])
         st.divider()
         obs_mode = st.radio("Logic Mode", modes)
@@ -192,7 +192,7 @@ with tab1:
         current_set = st.selectbox("Semantic Set", list(logic_config[obs_mode].keys()))
         labels = logic_config[obs_mode][current_set]
 
-        if st.button("🔄 Clear All Selections"):
+        if st.button("🔄🔄🔄🔄🔄"):
             st.session_state['selected_hours'] = []
             st.session_state['run_id'] += 1
             st.session_state['last_log'] = None
@@ -263,14 +263,14 @@ with tab1:
 # TAB 2 — SETTINGS
 # ==========================================
 with tab2:
-    st.title("⚙️ Configuration Reference Matrix")
+    # st.title("⚙️ Configuration Reference Matrix")
 
     m_choice = st.radio("Target Logic Variant Mapping Configuration Set:", modes, horizontal=True)
     max_map_val = 2 if m_choice == "Binary" else (3 if m_choice == "Trivalent" else 4)
 
     col_set_a, col_set_b = st.columns(2)
     with col_set_a:
-        st.subheader("Preset Alignment Map A")
+        st.subheader("Preset A")
         key_a = f"map_a_{m_choice.lower()}"
         new_map_a = {
             p: st.number_input(f"{p} Value Mapping", 1, max_map_val,
@@ -283,7 +283,7 @@ with tab2:
             st.success("Set A state cached.")
 
     with col_set_b:
-        st.subheader("Preset Alignment Map B")
+        st.subheader("Preset B")
         key_b = f"map_b_{m_choice.lower()}"
         new_map_b = {
             p: st.number_input(f"{p} Value Mapping", 1, max_map_val,
@@ -296,31 +296,31 @@ with tab2:
             st.success("Set B state cached.")
 
     st.divider()
-    st.subheader("🗺️ Structural Layout Matrix Mapping Table")
+    # st.subheader("Structural Layout Matrix Mapping Table")
 
-    cr1, cr2 = st.columns(2)
-    with cr1:
-        st.markdown("**Left Matrix Components (Jupiter · Venus · Mercury · Moon)**")
-        left_ref = [
-            {
-                "Hour Index": h,
-                "Structural Assignments": " + ".join(LEFT_CLOCK[h]["planets"]),
-                "Static Vectors": str(LEFT_CLOCK[h]["ref_vals"]),
-            }
-            for h in [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        ]
-        st.dataframe(left_ref, width='stretch', hide_index=True)
+    # cr1, cr2 = st.columns(2)
+    # with cr1:
+    #     st.markdown("**Left Matrix Components (Jupiter · Venus · Mercury · Moon)**")
+    #     left_ref = [
+    #         {
+    #             "Hour Index": h,
+    #             "Structural Assignments": " + ".join(LEFT_CLOCK[h]["planets"]),
+    #             "Static Vectors": str(LEFT_CLOCK[h]["ref_vals"]),
+    #         }
+    #         for h in [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    #     ]
+    #     st.dataframe(left_ref, width='stretch', hide_index=True)
 
-    with cr2:
-        st.markdown("**Right Matrix Components (Rahu · Mars · Sun · Saturn)**")
-        right_ref = [
-            {
-                "Hour Index": h,
-                "Structural Assignments": " + ".join(RIGHT_CLOCK[h]["planets"]),
-                "Static Vectors": str(RIGHT_CLOCK[h]["ref_vals"]),
-            }
-            for h in [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        ]
-        st.dataframe(right_ref, width='stretch', hide_index=True)
+    # with cr2:
+    #     st.markdown("**Right Matrix Components (Rahu · Mars · Sun · Saturn)**")
+    #     right_ref = [
+    #         {
+    #             "Hour Index": h,
+    #             "Structural Assignments": " + ".join(RIGHT_CLOCK[h]["planets"]),
+    #             "Static Vectors": str(RIGHT_CLOCK[h]["ref_vals"]),
+    #         }
+    #         for h in [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    #     ]
+    #     st.dataframe(right_ref, width='stretch', hide_index=True)
 
-st.caption("Tattva Lab v31 • Monochrome Space Platform • Native State Tracking Modality Enabled")
+# st.caption("Tattva Lab v31 • Monochrome Space Platform • Native State Tracking Modality Enabled")

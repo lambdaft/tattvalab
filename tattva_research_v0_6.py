@@ -216,7 +216,7 @@ with tab1:
         # try:    magic_num = int(raw_magic)
         # except: magic_num = 0
 
-        user_note = st.text_area("📝 Notes", max_chars=200, height=90, key=f"n_{st.session_state['run_id']}")
+        # user_note = st.text_area("📝 Notes", max_chars=200, height=90, key=f"n_{st.session_state['run_id']}")
 
         if st.session_state['selected_hours']:
             predicted = get_predicted_values(st.session_state['selected_hours'], current_active_map, max_val_mode)

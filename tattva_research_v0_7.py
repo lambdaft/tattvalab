@@ -2,6 +2,7 @@ import streamlit as st
 import datetime
 
 # ====================== CLOCK CONFIGURATION ======================
+# Each entry: planets (in sequence), reference default values.
 LEFT_CLOCK = {
     12: {"planets": ["Jupiter"],           "ref_vals": [4],   "label": "\u2643"},
     1:  {"planets": ["Jupiter", "Venus"],  "ref_vals": [4,3], "label": "\u2643 + \u2640"},
@@ -33,6 +34,7 @@ RIGHT_CLOCK = {
 }
 
 # ====================== DIAMOND GRID LAYOUT ======================
+# (row, col) → clock hour (7×7 grid, diamond shape)
 DIAMOND_MAP = {
     (1, 4): 12, (2, 5): 1,  (3, 6): 2,  (4, 7): 3,
     (5, 6): 4,  (6, 5): 5,  (7, 4): 6,  (6, 3): 7,
@@ -61,16 +63,16 @@ for m in modes:
 
 st.set_page_config(page_title="Tattva Lab v31", layout="wide")
 
-# ====================== BULLETPROOF MONOCHROME STYLING ======================
+# ====================== MONOCHROME STYLING ======================
 st.markdown("""
 <style>
-    /* Global Overrides */
+    /* Global layout adjustments */
     body, .main {
         background-color: #FFFFFF !important;
         color: #000000 !important;
     }
 
-    /* Target all buttons inside our diamond grids to increase font sizing uniformly */
+    /* Diamond grid buttons layout override */
     .stButton button {
         height: 88px !important;               
         font-weight: 800 !important;
@@ -79,34 +81,47 @@ st.markdown("""
         line-height: 1.15 !important;
         padding: 8px 4px !important;
         font-family: "Segoe UI Symbol", "Apple Symbols", sans-serif !important;
-        font-size: 26px !important; /* Good catch-all base size */
-        transition: all 0.15s ease;
-    }
-
-    /* UNSELECTED STATE (Secondary Buttons) */
-    .stButton button[data-testid="stBaseButton-secondary"] {
         background-color: #FFFFFF !important;
         color: #000000 !important;
         border: 1px solid #CCCCCC !important;
-    }
-    .stButton button[data-testid="stBaseButton-secondary"]:hover {
-        background-color: #F5F5F5 !important;
-        border-color: #888888 !important;
+        transition: all 0.2s ease;
     }
 
-    /* SELECTED STATE (Primary Buttons) - Crisp Black / Dark Grey Inversion */
-    .stButton button[data-testid="stBaseButton-primary"] {
-        background-color: #000000 !important;
-        color: #FFFFFF !important;
-        border: 3px solid #000000 !important;
-        box-shadow: inset 0 0 0 2px #FFFFFF !important; /* Internal border ring for high-contrast visibility */
-    }
-    .stButton button[data-testid="stBaseButton-primary"]:hover {
-        background-color: #222222 !important;
-        border-color: #222222 !important;
+    /* Hover State */
+    .stButton button:hover {
+        background-color: #F0F0F0 !important;
+        border-color: #000000 !important;
+        transform: scale(1.05);
     }
 </style>
 """, unsafe_allow_html=True)
+
+
+def inject_monochrome_sizes(side, clock_config, selected_hours):
+    """Dynamically applies scale sizing and bold selection tracking borders."""
+    rules = []
+    for hour, cfg in clock_config.items():
+        btn_key = f"{side}_{hour}"
+        label   = cfg["label"]
+        
+        # Selected vs Unselected distinct state
+        if btn_key in selected_hours:
+            border_style = "3px solid #000000 !important"
+            bg_color = "#EFEFEF !important"
+        else:
+            border_style = "1px solid #CCCCCC !important"
+            bg_color = "#FFFFFF !important"
+
+        font_size = "36px" if " + " not in label else "26px"
+
+        rules.append(f"""
+        button[aria-label="{label}"], button[title="{label}"] {{
+            font-size: {font_size} !important;
+            border: {border_style};
+            background-color: {bg_color};
+        }}""")
+
+    st.markdown(f"<style>{''.join(rules)}</style>", unsafe_allow_html=True)
 
 
 def get_predicted_values(selected_hours, active_map, max_val):
@@ -133,12 +148,10 @@ def render_diamond_grid(side, clock_config, container):
                 label   = cfg["label"]
                 is_sel  = btn_key in st.session_state['selected_hours']
 
-                # We hand off state management directly to Streamlit's engine
                 if row_cols[c - 1].button(
                     label,
                     key=f"{btn_key}_{st.session_state['run_id']}",
-                    width='stretch',
-                    type="primary" if is_sel else "secondary"
+                    width='stretch'
                 ):
                     if is_sel:
                         st.session_state['selected_hours'].remove(btn_key)
@@ -202,6 +215,10 @@ with tab1:
     current_active_map = st.session_state[map_key]
     max_val_mode = 2 if obs_mode == "Binary" else (3 if obs_mode == "Trivalent" else 4)
 
+    # Dynamic monochrome rendering sizing injects
+    inject_monochrome_sizes("L", LEFT_CLOCK, st.session_state['selected_hours'])
+    inject_monochrome_sizes("R", RIGHT_CLOCK, st.session_state['selected_hours'])
+
     col_l, col_m, col_r = st.columns([4, 2, 4])
 
     with col_l:
@@ -251,7 +268,7 @@ with tab1:
 
         o_cols = st.columns(len(labels))
         for i, lbl in enumerate(labels):
-            if o_cols[i].button(f"{lbl}", key=f"o_{i}_{st.session_state['run_id']}", width='stretch', type="secondary"):
+            if o_cols[i].button(f"{lbl}", key=f"o_{i}_{st.session_state['run_id']}", width='stretch'):
                 verdict = "Right" if (i + 1) in predicted_ints else "Wrong"
                 
                 st.session_state['last_log'] = f"Logged Selection: **{lbl}** → Marked: **{verdict}** (Magic Axis Value: {magic_num})"
@@ -265,13 +282,13 @@ with tab1:
 with tab2:
     st.title("⚙️ Configuration Reference Matrix")
 
-    m_choice = st.radio("Target Logic Variant Mapping Configuration Set:", modes, horizontal=True)
+    m_choice    = st.radio("Target Logic Variant Mapping Configuration Set:", modes, horizontal=True)
     max_map_val = 2 if m_choice == "Binary" else (3 if m_choice == "Trivalent" else 4)
 
     col_set_a, col_set_b = st.columns(2)
     with col_set_a:
         st.subheader("Preset Alignment Map A")
-        key_a = f"map_a_{m_choice.lower()}"
+        key_a   = f"map_a_{m_choice.lower()}"
         new_map_a = {
             p: st.number_input(f"{p} Value Mapping", 1, max_map_val,
                                int(st.session_state[key_a].get(p, 1)),
@@ -284,7 +301,7 @@ with tab2:
 
     with col_set_b:
         st.subheader("Preset Alignment Map B")
-        key_b = f"map_b_{m_choice.lower()}"
+        key_b   = f"map_b_{m_choice.lower()}"
         new_map_b = {
             p: st.number_input(f"{p} Value Mapping", 1, max_map_val,
                                int(st.session_state[key_b].get(p, max_map_val)),
@@ -323,4 +340,4 @@ with tab2:
         ]
         st.dataframe(right_ref, width='stretch', hide_index=True)
 
-st.caption("Tattva Lab v31 • Monochrome Space Platform • Native State Tracking Modality Enabled")
+st.caption("Tattva Lab v31 • Monochrome Space Platform • No Local Storage Dependency Tracking Enabled")

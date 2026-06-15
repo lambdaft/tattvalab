@@ -212,9 +212,9 @@ with tab1:
         st.markdown(f"**Preset:** {st.session_state['active_preset']}  \n**Mode:** {obs_mode}  \n**Set:** {current_set}")
         st.divider()
 
-        raw_magic = st.text_input("✨ Magic Number", value="0", key=f"m_{st.session_state['run_id']}")
-        try:    magic_num = int(raw_magic)
-        except: magic_num = 0
+        # raw_magic = st.text_input("✨ Magic Number", value="0", key=f"m_{st.session_state['run_id']}")
+        # try:    magic_num = int(raw_magic)
+        # except: magic_num = 0
 
         user_note = st.text_area("📝 Notes", max_chars=200, height=90, key=f"n_{st.session_state['run_id']}")
 
@@ -231,7 +231,7 @@ with tab1:
         render_diamond_grid("R", RIGHT_CLOCK, st.container())
 
     st.divider()
-    st.subheader("🎯 Log Outcome")
+    # st.subheader("🎯 Log Outcome")
 
     if st.session_state['last_log']:
         st.info(st.session_state['last_log'])
@@ -254,7 +254,7 @@ with tab1:
             if o_cols[i].button(f"{lbl}", key=f"o_{i}_{st.session_state['run_id']}", width='stretch', type="secondary"):
                 verdict = "Right" if (i + 1) in predicted_ints else "Wrong"
                 
-                st.session_state['last_log'] = f"Logged Selection: **{lbl}** → Marked: **{verdict}** (Magic Axis Value: {magic_num})"
+                st.session_state['last_log'] = f"Logged Selection: **{lbl}** → Marked: **{verdict}**)"
                 st.session_state['selected_hours'] = []
                 st.session_state['run_id'] += 1
                 st.rerun()

@@ -84,6 +84,13 @@ DEFAULTS = {
     }
 }
 
+DEFAULTS_VERSION = 3
+if st.session_state.get('defaults_version') != DEFAULTS_VERSION:
+    for m in modes:
+        st.session_state.pop(f"map_a_{m.lower()}", None)
+        st.session_state.pop(f"map_b_{m.lower()}", None)
+    st.session_state['defaults_version'] = DEFAULTS_VERSION
+
 for m in modes:
     m_lower = m.lower()
     key_a, key_b = f"map_a_{m_lower}", f"map_b_{m_lower}"
@@ -227,8 +234,8 @@ def get_predicted_values(selected_hours, active_map, max_val):
             val = active_map.get(planet, 1)
             if val <= max_val and val not in predicted:
                 predicted.append(val)
-    # Trivalent: 1 and 3 are the pure sides; mixing both gives the middle (Tie/Both/Flat)
-    if max_val == 3 and 1 in predicted and 3 in predicted:
+    # Trivalent: 1 and 3 are the pure sides; multiple selections or mixed sides give the middle (Tie/Both/Flat)
+    if max_val == 3 and (len(selected_hours) > 1 or (1 in predicted and 3 in predicted)):
         return [2]
     return predicted
 
@@ -387,7 +394,7 @@ with tab2:
     m_choice    = st.radio("Target Logic Variant Mapping Configuration Set:", modes, horizontal=True)
     max_map_val = 2 if m_choice == "Binary" else (3 if m_choice == "Trivalent" else 4)
     if m_choice == "Trivalent":
-        st.caption("Use 1 and 3 for the two sides; the middle value (2) is predicted only when both appear (mixed).")
+        st.caption("Use 1 and 3 for the two sides; the middle value (2) is predicted for multiple selections or mixed planets.")
 
     col_set_a, col_set_b = st.columns(2)
     with col_set_a:

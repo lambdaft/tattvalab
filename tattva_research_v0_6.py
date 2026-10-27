@@ -65,11 +65,11 @@ DEFAULTS = {
     "trivalent": {
         "map_a": {
             "Mercury": 1, "Sun": 1, "Moon": 1, "Mars": 1,
-            "Venus": 2, "Saturn": 2, "Jupiter": 2, "Rahu": 2, "Ketu": 3
+            "Venus": 3, "Saturn": 3, "Jupiter": 3, "Rahu": 3, "Ketu": 2
         },
         "map_b": {
-            "Mercury": 2, "Sun": 2, "Moon": 2, "Mars": 2,
-            "Venus": 1, "Saturn": 1, "Jupiter": 1, "Rahu": 1, "Ketu": 3
+            "Mercury": 3, "Sun": 3, "Moon": 3, "Mars": 3,
+            "Venus": 1, "Saturn": 1, "Jupiter": 1, "Rahu": 1, "Ketu": 2
         }
     },
     "quaternary": {
@@ -83,6 +83,13 @@ DEFAULTS = {
         }
     }
 }
+
+DEFAULTS_VERSION = 3
+if st.session_state.get('defaults_version') != DEFAULTS_VERSION:
+    for m in modes:
+        st.session_state.pop(f"map_a_{m.lower()}", None)
+        st.session_state.pop(f"map_b_{m.lower()}", None)
+    st.session_state['defaults_version'] = DEFAULTS_VERSION
 
 for m in modes:
     m_lower = m.lower()
@@ -227,6 +234,9 @@ def get_predicted_values(selected_hours, active_map, max_val):
             val = active_map.get(planet, 1)
             if val <= max_val and val not in predicted:
                 predicted.append(val)
+    # Trivalent: 1 and 3 are the pure sides; multiple selections or mixed sides give the middle (Tie/Both/Flat)
+    if max_val == 3 and (len(selected_hours) > 1 or (1 in predicted and 3 in predicted)):
+        return [2]
     return predicted
 
 
@@ -383,6 +393,8 @@ with tab2:
 
     m_choice    = st.radio("Target Logic Variant Mapping Configuration Set:", modes, horizontal=True)
     max_map_val = 2 if m_choice == "Binary" else (3 if m_choice == "Trivalent" else 4)
+    if m_choice == "Trivalent":
+        st.caption("Use 1 and 3 for the two sides; the middle value (2) is predicted for multiple selections or mixed planets.")
 
     col_set_a, col_set_b = st.columns(2)
     with col_set_a:

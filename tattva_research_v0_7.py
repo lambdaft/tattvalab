@@ -65,11 +65,11 @@ DEFAULTS = {
     "trivalent": {
         "map_a": {
             "Mercury": 1, "Sun": 1, "Moon": 1, "Mars": 1,
-            "Venus": 2, "Saturn": 2, "Jupiter": 2, "Rahu": 2, "Ketu": 3
+            "Venus": 2, "Saturn": 2, "Jupiter": 2, "Rahu": 2, "Ketu": 2
         },
         "map_b": {
             "Mercury": 2, "Sun": 2, "Moon": 2, "Mars": 2,
-            "Venus": 1, "Saturn": 1, "Jupiter": 1, "Rahu": 1, "Ketu": 3
+            "Venus": 1, "Saturn": 1, "Jupiter": 1, "Rahu": 1, "Ketu": 1
         }
     },
     "quaternary": {
@@ -225,8 +225,13 @@ def get_predicted_values(selected_hours, active_map, max_val):
         clock_cfg = LEFT_CLOCK if side == 'L' else RIGHT_CLOCK
         for planet in clock_cfg[hour]["planets"]:
             val = active_map.get(planet, 1)
-            if val <= max_val and val not in predicted:
+            if max_val == 3:
+                if val in (1, 2) and val not in predicted:
+                    predicted.append(val)
+            elif val <= max_val and val not in predicted:
                 predicted.append(val)
+    if max_val == 3 and len(predicted) == 2:
+        return [3]
     return predicted
 
 
@@ -382,7 +387,9 @@ with tab2:
     st.title("⚙️ Configuration Reference Matrix")
 
     m_choice    = st.radio("Target Logic Variant Mapping Configuration Set:", modes, horizontal=True)
-    max_map_val = 2 if m_choice == "Binary" else (3 if m_choice == "Trivalent" else 4)
+    max_map_val = 2 if m_choice in ("Binary", "Trivalent") else 4
+    if m_choice == "Trivalent":
+        st.caption("Tie (3) is predicted only when the selected planets have mixed Tattvas (1 and 2).")
 
     col_set_a, col_set_b = st.columns(2)
     with col_set_a:
